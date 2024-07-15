@@ -1,7 +1,8 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Todo as TodoType } from '../types/Todo';
-import { TodoListItem } from './TodoListItem';
+import { Todo } from './Todo';
+import cn from 'classnames';
 
 type Props = {
   filteredTodos: TodoType[];
@@ -20,37 +21,35 @@ export const TodoList: React.FC<Props> = ({
   idsProcessing,
   inputRef,
 }) => {
+  const renderTodoItem = ({
+    id,
+    title,
+    completed,
+    isTemp = false,
+  }: TodoType & { isTemp?: boolean }) => (
+    <CSSTransition
+      key={id}
+      timeout={300}
+      classNames={cn({ 'temp-item': isTemp, item: !isTemp })}
+    >
+      <Todo
+        id={id}
+        title={title}
+        completed={completed}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        idsProcessing={idsProcessing}
+        isTemp={isTemp}
+        inputRef={inputRef}
+      />
+    </CSSTransition>
+  );
+
   return (
     <section className="todoapp__main" data-cy="TodoList">
       <TransitionGroup>
-        {filteredTodos.map(({ id, title, completed }) => (
-          <CSSTransition key={id} timeout={300} classNames="item">
-            <TodoListItem
-              id={id}
-              title={title}
-              completed={completed}
-              onDelete={onDelete}
-              onEdit={onEdit}
-              idsProcessing={idsProcessing}
-              inputRef={inputRef}
-            />
-          </CSSTransition>
-        ))}
-
-        {tempTodo && (
-          <CSSTransition key={tempTodo.id} timeout={300} classNames="temp-item">
-            <TodoListItem
-              id={tempTodo.id}
-              title={tempTodo.title}
-              completed={tempTodo.completed}
-              onDelete={onDelete}
-              onEdit={onEdit}
-              idsProcessing={idsProcessing}
-              isTemp={true}
-              inputRef={inputRef}
-            />
-          </CSSTransition>
-        )}
+        {filteredTodos.map(todo => renderTodoItem({ ...todo }))};
+        {tempTodo && renderTodoItem({ ...tempTodo, isTemp: true })};
       </TransitionGroup>
     </section>
   );

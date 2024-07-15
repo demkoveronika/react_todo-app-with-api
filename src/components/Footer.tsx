@@ -4,7 +4,7 @@ import cn from 'classnames';
 
 type Props = {
   todos: Todo[];
-  activeTodos: number;
+  activeTodosCount: Todo[];
   filter: FilterBy;
   onFilter: (selectedFilter: FilterBy) => void;
   onDelete: (id: number) => void;
@@ -12,7 +12,7 @@ type Props = {
 
 export const Footer: React.FC<Props> = ({
   todos,
-  activeTodos,
+  activeTodosCount,
   filter,
   onFilter,
   onDelete,
@@ -27,13 +27,15 @@ export const Footer: React.FC<Props> = ({
     <>
       <footer className="todoapp__footer" data-cy="Footer">
         <span className="todo-count" data-cy="TodosCounter">
-          {activeTodos} items left
+          {activeTodosCount.length} items left
         </span>
 
         <nav className="filter" data-cy="Filter">
           <a
             href="#/"
-            className={cn('filter__link', { selected: filter === 'all' })}
+            className={cn('filter__link', {
+              selected: filter === FilterBy.All,
+            })}
             data-cy="FilterLinkAll"
             onClick={() => onFilter(FilterBy.All)}
           >
@@ -43,7 +45,7 @@ export const Footer: React.FC<Props> = ({
           <a
             href="#/active"
             className={cn('filter__link', {
-              selected: filter === 'active',
+              selected: filter === FilterBy.Active,
             })}
             data-cy="FilterLinkActive"
             onClick={() => onFilter(FilterBy.Active)}
@@ -54,7 +56,7 @@ export const Footer: React.FC<Props> = ({
           <a
             href="#/completed"
             className={cn('filter__link', {
-              selected: filter === 'completed',
+              selected: filter === FilterBy.Completed,
             })}
             data-cy="FilterLinkCompleted"
             onClick={() => onFilter(FilterBy.Completed)}

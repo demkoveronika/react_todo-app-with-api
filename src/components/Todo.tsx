@@ -15,7 +15,7 @@ type Props = {
   inputRef: React.RefObject<HTMLInputElement>;
 };
 
-export const TodoListItem: React.FC<Props> = ({
+export const Todo: React.FC<Props> = ({
   id,
   title,
   completed,
@@ -27,21 +27,19 @@ export const TodoListItem: React.FC<Props> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleCompleted = async (isCompleted: boolean) => {
+  const handleCompleted = async () => {
     try {
-      await onEdit(id, { completed: isCompleted });
-    } catch {
-      // eslint-disable-next-line no-console
-      console.log('Error editing todo');
+      await onEdit(id, { completed: !completed });
+    } catch (e) {
+      throw e;
     }
   };
 
   const handleDelete = async () => {
     try {
       await onDelete(id);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Error deleting todo');
+    } catch (e) {
+      throw e;
     }
   };
 
@@ -78,7 +76,7 @@ export const TodoListItem: React.FC<Props> = ({
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          onClick={() => handleCompleted(!completed)}
+          onClick={handleCompleted}
           checked={completed}
         />
       </label>

@@ -1,12 +1,14 @@
+/* eslint-disable prettier/prettier */
 import { useState } from 'react';
 import { Todo } from '../types/Todo';
 import cn from 'classnames';
 import * as todoService from './../api/todos';
+import { ErrorMessage } from '../types/ErrorMessage';
 
 type Props = {
-  activeTodos: number;
-  completedTodos: number;
-  setValueError: (e: string) => void;
+  activeTodosCount: Todo[];
+  completedTodosCount: number;
+  setErrorMessage: (e: string) => void;
   setTempTodo: React.Dispatch<React.SetStateAction<Todo | null>>;
   isLoading: boolean;
   autoHideNotification: () => void;
@@ -16,9 +18,9 @@ type Props = {
 };
 
 export const Header: React.FC<Props> = ({
-  activeTodos,
-  completedTodos,
-  setValueError,
+  activeTodosCount,
+  completedTodosCount,
+  setErrorMessage,
   isLoading,
   autoHideNotification,
   onAdd,
@@ -32,8 +34,8 @@ export const Header: React.FC<Props> = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (valueTitle.trim() === '') {
-      setValueError('Title should not be empty');
+    if (!valueTitle.trim()) {
+      setErrorMessage(ErrorMessage.EmptyTitle);
       autoHideNotification();
       inputRef.current?.focus();
 
@@ -65,22 +67,23 @@ export const Header: React.FC<Props> = ({
       setTempTodo(null);
       inputRef.current?.focus();
     } catch (error) {
-      setValueError('Unable to add a todo');
+      setErrorMessage(ErrorMessage.AddTodo);
       autoHideNotification();
-      inputRef.current?.focus();
     } finally {
       setTempTodo(null);
+      inputRef.current?.focus();
       setIsSubmitting(false);
     }
   };
 
   return (
     <header className="todoapp__header">
-      {(activeTodos > 0 || completedTodos > 0) && !isLoading && (
+      {(activeTodosCount.length > 0 || completedTodosCount > 0) &&
+        !isLoading && (
         <button
           type="button"
           className={cn('todoapp__toggle-all', {
-            active: activeTodos === 0,
+            active: !activeTodosCount.length,
           })}
           data-cy="ToggleAllButton"
           onClick={onToggleAll}

@@ -12,10 +12,11 @@ import { Header } from './components/Header';
 import { TodoList } from './components/TodoList';
 import { Footer } from './components/Footer';
 import { ErrorNotification } from './components/ErrorNotification';
+import { ErrorMessage } from './types/ErrorMessage';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [valueError, setValueError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [filterBy, setFilterBy] = useState<FilterBy>(FilterBy.All);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [idsProcessing, setIdsProcessing] = useState<number[]>([]);
@@ -25,7 +26,7 @@ export const App: React.FC = () => {
 
   const autoHideNotification = () => {
     setTimeout(() => {
-      setValueError('');
+      setErrorMessage('');
     }, 3000);
   };
 
@@ -36,7 +37,7 @@ export const App: React.FC = () => {
 
         setTodos(todosFromServer);
       } catch (error) {
-        setValueError('Unable to load todos');
+        setErrorMessage(ErrorMessage.LoadTodos);
         autoHideNotification();
       } finally {
         setIsLoading(false);
@@ -50,7 +51,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, [todos, filterBy, tempTodo, valueError]);
+  }, [todos, filterBy, tempTodo, errorMessage]);
 
   const handleAddTodo = async (newTodo: Todo) => {
     setTodos(prevTodos => [...prevTodos, newTodo]);
@@ -63,7 +64,7 @@ export const App: React.FC = () => {
       setTodos(currentTodos => currentTodos.filter(todo => todo.id !== todoId));
       inputRef.current?.focus();
     } catch (error) {
-      setValueError('Unable to delete a todo');
+      setErrorMessage(ErrorMessage.DeleteTodo);
       autoHideNotification();
     } finally {
       setTempTodo(null);
@@ -86,19 +87,19 @@ export const App: React.FC = () => {
         }),
       );
     } catch (error) {
-      setValueError('Unable to update a todo');
+      setErrorMessage(ErrorMessage.UpdateTodo);
       autoHideNotification();
-      throw new Error('Unable to update a todo');
+      throw new Error(ErrorMessage.UpdateTodo);
     } finally {
       setIdsProcessing([]);
     }
   };
 
-  const activeTodos = todos.filter(todo => !todo.completed).length;
-  const completedTodos = todos.length - activeTodos;
+  const activeTodosCount = todos.filter(todo => !todo.completed);
+  const completedTodosCount = todos.length - activeTodosCount.length;
 
   const handleToggleAll = async () => {
-    if (completedTodos === todos.length) {
+    if (completedTodosCount === todos.length) {
       try {
         setIdsProcessing(todos.map(todo => todo.id));
 
@@ -110,7 +111,7 @@ export const App: React.FC = () => {
 
         setTodos(updatedTodos);
       } catch (error) {
-        setValueError('Unable to update todos');
+        setErrorMessage(ErrorMessage.UpdateTodo);
       } finally {
         setIdsProcessing([]);
       }
@@ -118,14 +119,13 @@ export const App: React.FC = () => {
       return;
     }
 
-    const allActiveTodos = todos.filter(todo => !todo.completed);
-    const activeIds = allActiveTodos.map(todo => todo.id);
+    const activeIds = activeTodosCount.map(todo => todo.id);
 
     setIdsProcessing(activeIds);
 
     try {
       await Promise.all(
-        allActiveTodos.map(todo =>
+        activeTodosCount.map(todo =>
           todoService.patchTodo(todo.id, { completed: true }),
         ),
       );
@@ -140,7 +140,7 @@ export const App: React.FC = () => {
         }),
       );
     } catch (error) {
-      setValueError('Unable to update todos');
+      setErrorMessage(ErrorMessage.UpdateTodo);
     } finally {
       setIdsProcessing([]);
     }
@@ -151,7 +151,7 @@ export const App: React.FC = () => {
   };
 
   const handleCloseNotifications = () => {
-    setValueError('');
+    setErrorMessage('');
   };
 
   if (!todoService.USER_ID) {
@@ -164,13 +164,13 @@ export const App: React.FC = () => {
 
       <div className="todoapp__content">
         <Header
-          setValueError={setValueError}
+          setErrorMessage={setErrorMessage}
           autoHideNotification={autoHideNotification}
           onAdd={handleAddTodo}
           setTempTodo={setTempTodo}
           onToggleAll={handleToggleAll}
-          activeTodos={activeTodos}
-          completedTodos={completedTodos}
+          activeTodosCount={activeTodosCount}
+          completedTodosCount={completedTodosCount}
           isLoading={isLoading}
           inputRef={inputRef}
         />
@@ -190,7 +190,7 @@ export const App: React.FC = () => {
           <Footer
             todos={todos}
             filter={filterBy}
-            activeTodos={activeTodos}
+            activeTodosCount={activeTodosCount}
             onFilter={handleFilter}
             onDelete={handleDeleteTodo}
           />
@@ -198,7 +198,7 @@ export const App: React.FC = () => {
       </div>
 
       <ErrorNotification
-        valueError={valueError}
+        errorMessage={errorMessage}
         onClose={handleCloseNotifications}
       />
     </div>
