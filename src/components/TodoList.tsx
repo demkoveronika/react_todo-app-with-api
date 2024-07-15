@@ -48,8 +48,8 @@ export const TodoList: React.FC<Props> = ({
   return (
     <section className="todoapp__main" data-cy="TodoList">
       <TransitionGroup>
-        {filteredTodos.map(todo => renderTodoItem({ ...todo }))};
-        {tempTodo && renderTodoItem({ ...tempTodo, isTemp: true })};
+        {filteredTodos.map(todo => renderTodoItem({ ...todo }))}
+        {tempTodo && renderTodoItem({ ...tempTodo, isTemp: true })}
       </TransitionGroup>
     </section>
   );
