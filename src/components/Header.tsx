@@ -76,10 +76,12 @@ export const Header: React.FC<Props> = ({
     }
   };
 
+  const hasTodos = activeTodosCount.length > 0 || completedTodosCount > 0;
+  const shouldRender = hasTodos && !isLoading;
+
   return (
     <header className="todoapp__header">
-      {(activeTodosCount.length > 0 || completedTodosCount > 0) &&
-        !isLoading && (
+      {shouldRender && (
         <button
           type="button"
           className={cn('todoapp__toggle-all', {
@@ -89,6 +91,7 @@ export const Header: React.FC<Props> = ({
           onClick={onToggleAll}
         />
       )}
+
       <form onSubmit={handleSubmit}>
         <input
           data-cy="NewTodoField"

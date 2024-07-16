@@ -21,6 +21,10 @@ export const TodoList: React.FC<Props> = ({
   idsProcessing,
   inputRef,
 }) => {
+  const transitionConfig = {
+    timeout: 300,
+  };
+
   const renderTodoItem = ({
     id,
     title,
@@ -29,8 +33,11 @@ export const TodoList: React.FC<Props> = ({
   }: TodoType & { isTemp?: boolean }) => (
     <CSSTransition
       key={id}
-      timeout={300}
-      classNames={cn({ 'temp-item': isTemp, item: !isTemp })}
+      timeout={transitionConfig.timeout}
+      classNames={cn({
+        'temp-item': isTemp,
+        item: !isTemp,
+      })}
     >
       <Todo
         id={id}

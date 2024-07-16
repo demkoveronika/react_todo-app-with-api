@@ -3,6 +3,7 @@ import cn from 'classnames';
 import { useState } from 'react';
 import { Todo as TodoType } from '../types/Todo';
 import { TodoForm } from './TodoForm';
+import { ErrorNotification } from './ErrorNotification';
 
 type Props = {
   id: number;
@@ -26,12 +27,17 @@ export const Todo: React.FC<Props> = ({
   inputRef,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleCompleted = async () => {
     try {
       await onEdit(id, { completed: !completed });
     } catch (e) {
-      throw e;
+      if (e instanceof Error && e.message) {
+        setError(e.message);
+      } else {
+        setError('An error occurred');
+      }
     }
   };
 
@@ -39,8 +45,16 @@ export const Todo: React.FC<Props> = ({
     try {
       await onDelete(id);
     } catch (e) {
-      throw e;
+      if (e instanceof Error && e.message) {
+        setError(e.message);
+      } else {
+        setError('An error occurred');
+      }
     }
+  };
+
+  const handleCloseError = () => {
+    setError(null);
   };
 
   const handleFormattedTitle = async (valueTitle: string) => {
@@ -60,7 +74,7 @@ export const Todo: React.FC<Props> = ({
       await onEdit(id, { title: formattedTitle });
 
       setIsEditing(false);
-    } catch (error) {
+    } catch (e) {
       inputRef.current?.focus();
     }
   };
@@ -119,6 +133,10 @@ export const Todo: React.FC<Props> = ({
         <div className="modal-background has-background-white-ter" />
         <div className="loader" />
       </div>
+
+      {error && (
+        <ErrorNotification errorMessage={error} onClose={handleCloseError} />
+      )}
     </div>
   );
 };
